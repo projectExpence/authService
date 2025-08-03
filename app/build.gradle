@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '3.2.5' // Use your desired Spring Boot version
+    id 'io.spring.dependency-management' version '1.1.5' // Use a compatible version
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    lombokVersion = "1.18.30"
+}
+
+dependencies {
+    // Use JUnit test framework.
+    testImplementation libs.junit
+
+    // This dependency is used by the application.
+    implementation libs.guava
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2' // Example for a runtime-only dependency
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.modelmapper:modelmapper:3.2.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "org.projectlombok:lombok:$lombokVersion"
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = 'org.example.App'
+}
