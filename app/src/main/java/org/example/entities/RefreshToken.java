@@ -1,5 +1,6 @@
 package org.example.entities;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class) // JSON naming strategy
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class) // JSON naming strategy
 @Table(name = "tokens") // Table name for RefreshToken entity
 public class RefreshToken {
 

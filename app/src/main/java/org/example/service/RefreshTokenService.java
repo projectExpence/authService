@@ -20,14 +20,15 @@ public class RefreshTokenService {
     @Autowired
     UserRepository userRepository;
 
-    public RefreshToken createRefreshToken(String username){
-        UserInfo userInfoExtracted = userRepository.findByUsername(username).orElseThrow(()->
-                new UsernameNotFoundException("User not found")
-                );
+    public RefreshToken createOrUpdateRefreshToken(UserInfo userInfo) {
+        // Delete existing token (invalidate old one)
+        refreshTokenRepository.findByUserInfo(userInfo).ifPresent(refreshTokenRepository::delete);
+
+        // Create a new one
         RefreshToken refreshToken = RefreshToken.builder()
-                .userInfo(userInfoExtracted)
+                .userInfo(userInfo)
                 .token(UUID.randomUUID().toString())
-                .expiryTime(Instant.now().plusMillis(600000))
+                .expiryTime(Instant.now().plusMillis(600000)) // 10 min expiry
                 .build();
         return refreshTokenRepository.save(refreshToken);
     }

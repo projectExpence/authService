@@ -20,7 +20,7 @@ public class UserInfo {// Entity class representing user information
     private String userId;
 
     @Column(nullable = false,unique = true)
-    private String userName;
+    private String username;
 
     @Column(nullable = false,unique = true)
     private String email;

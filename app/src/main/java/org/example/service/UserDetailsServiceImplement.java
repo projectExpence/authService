@@ -30,14 +30,19 @@ public class UserDetailsServiceImplement implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserInfo user = userRepository.findByUsername(username).orElseThrow(
+        UserInfo user = userRepository.findByEmail(username).orElseThrow(
                 ()-> new UsernameNotFoundException("Could not find user"));
         return new CustomUserDetails(user);
     }
 
-    public UserInfo checkUserAlreadyExists(UserInfoDto userInfoDto){
-        return userRepository.findByUsername(userInfoDto.getUserName()).orElse(null);
+    public boolean checkUserAlreadyExists(UserInfoDto userInfoDto) {
+        return userRepository.findByEmail(userInfoDto.getEmail()).isPresent()
+                || userRepository.findByUsername(userInfoDto.getUsername()).isPresent();
     }
+    public UserInfo checkUserByUsername(String username){
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
 
     public Boolean isValidEmail(String email){
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
@@ -52,18 +57,31 @@ public class UserDetailsServiceImplement implements UserDetailsService {
         return password.matches(specialCharRegex);
     }
 
-    public Boolean sighupUser(UserInfoDto userInfoDto){
-        if(!isValidEmail(userInfoDto.getEmail()) || !isValidPassword(userInfoDto.getPassword())){
-            return false;
+    public enum SignupResult {
+        SUCCESS,
+        INVALID_EMAIL,
+        INVALID_PASSWORD,
+        USER_EXISTS
+    }
+
+    public SignupResult signupUser(UserInfoDto userInfoDto){
+        if(!isValidEmail(userInfoDto.getEmail())){
+            return SignupResult.INVALID_EMAIL;
+        }
+        if(!isValidPassword(userInfoDto.getPassword())){
+            return SignupResult.INVALID_PASSWORD;
+        }
+        if (checkUserAlreadyExists(userInfoDto)) {  // Now returns boolean
+            return SignupResult.USER_EXISTS;
         }
         userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
-        if(Objects.nonNull(checkUserAlreadyExists(userInfoDto))){
-            return false;
-        }
         String userId = UUID.randomUUID().toString();
-        userRepository.save(new UserInfo(userId,userInfoDto.getUserName(),
+        userRepository.save(new UserInfo(
+                userId,
+                userInfoDto.getUsername(),
                 userInfoDto.getEmail(),
-                userInfoDto.getPassword(),new HashSet<>()));
-        return true;
+                userInfoDto.getPassword(),
+                new HashSet<>()));
+        return SignupResult.SUCCESS;
     }
 }
