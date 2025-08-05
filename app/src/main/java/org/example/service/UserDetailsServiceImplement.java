@@ -2,6 +2,7 @@ package org.example.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.example.entities.Provider;
 import org.example.entities.UserInfo;
 import org.example.model.UserInfoDto;
 import org.example.repository.UserRepository;
@@ -78,6 +79,10 @@ public class UserDetailsServiceImplement implements UserDetailsService {
         String userId = UUID.randomUUID().toString();
         userRepository.save(new UserInfo(
                 userId,
+                userInfoDto.getFirstName(),
+                userInfoDto.getLastName(),
+                userInfoDto.getProfilePictureUrl(),
+                Provider.LOCAL,
                 userInfoDto.getUsername(),
                 userInfoDto.getEmail(),
                 userInfoDto.getPassword(),
