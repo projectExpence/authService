@@ -30,8 +30,8 @@ public class UserDetailsServiceImplement implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserInfo user = userRepository.findByEmail(username).orElseThrow(
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserInfo user = userRepository.findByEmail(email).orElseThrow(
                 ()-> new UsernameNotFoundException("Could not find user"));
         return new CustomUserDetails(user);
     }
@@ -76,6 +76,7 @@ public class UserDetailsServiceImplement implements UserDetailsService {
             return SignupResult.USER_EXISTS;
         }
         userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
+
         String userId = UUID.randomUUID().toString();
         userRepository.save(new UserInfo(
                 userId,

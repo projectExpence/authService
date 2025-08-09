@@ -49,7 +49,8 @@ public class AuthController {
                             .orElseThrow(() -> new UsernameNotFoundException("User not found after signup"));
                     RefreshToken refreshToken = refreshTokenService.createOrUpdateRefreshToken(savedUser);
                     String JwtToken = jwtService.GenerateToken(userInfoDto.getEmail());
-                    return new ResponseEntity<>(JwtResponseDto.builder()
+
+                    return new ResponseEntity<>(JwtResponseDto.builder() // data went to postman
                             .accessToken(JwtToken).token(refreshToken.getToken()).build(),HttpStatus.OK);
                 default:
                     return new ResponseEntity<>("Unknown error", HttpStatus.INTERNAL_SERVER_ERROR);
