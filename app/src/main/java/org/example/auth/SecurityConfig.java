@@ -3,7 +3,7 @@ package org.example.auth;
 import lombok.Data;
 // IMPORTANT: Add imports for the new classes
 import org.example.service.UserDetailsServiceImplement;
-import org.example.service.UserService;
+import org.example.service.GoogleUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,7 +70,7 @@ public class SecurityConfig {
 
         // --- STEP 1: INJECT YOUR NEW CUSTOM COMPONENTS ---
         @Autowired
-        private UserService customOAuth2UserService;
+        private GoogleUserService customOAuth2GoogleUserService;
 
         @Autowired
         private CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
@@ -85,7 +85,7 @@ public class SecurityConfig {
                     )
                     // --- STEP 2: REPLACE THE DEFAULT OAUTH2 LOGIN WITH YOUR CUSTOMIZED VERSION ---
                     .oauth2Login(oauth2 -> {
-                        oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)); // Use custom service to save user
+                        oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2GoogleUserService)); // Use custom service to save user
                         oauth2.successHandler(customOAuth2SuccessHandler); // Use custom handler to generate tokens and redirect
                     });
             return http.build();

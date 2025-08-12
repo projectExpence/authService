@@ -3,9 +3,12 @@ package org.example.service;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.example.entities.Provider;
+import org.example.entities.Roles;
 import org.example.entities.UserInfo;
+import org.example.entities.UserRole;
 import org.example.model.UserInfoDto;
 import org.example.repository.UserRepository;
+import org.example.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -27,6 +31,9 @@ public class UserDetailsServiceImplement implements UserDetailsService {
 
     @Autowired
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
 
     @Override
@@ -77,7 +84,13 @@ public class UserDetailsServiceImplement implements UserDetailsService {
         }
         userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
 
+        UserRole userRole = userRoleRepository.findByRoleName(Roles.USER)
+                .orElseThrow(()-> new RuntimeException("User role not found"));
+
+
         String userId = UUID.randomUUID().toString();
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(userRole);
         userRepository.save(new UserInfo(
                 userId,
                 userInfoDto.getFirstName(),
@@ -86,8 +99,8 @@ public class UserDetailsServiceImplement implements UserDetailsService {
                 Provider.LOCAL,
                 userInfoDto.getUsername(),
                 userInfoDto.getEmail(),
-                userInfoDto.getPassword(),
-                new HashSet<>()));
+                userInfoDto.getPassword(),roles
+                ));
         return SignupResult.SUCCESS;
     }
 }
