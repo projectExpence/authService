@@ -47,10 +47,12 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain jwtApiFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
             http
-                    .securityMatcher("/auth/v1/**", "/api/**")
+                    .securityMatcher("/auth/v1/**", "/api/**","/auth/admin/**")
                     .csrf(AbstractHttpConfigurer::disable)
                     .cors(cors -> cors.configurationSource(corsConfigurationSource))
                     .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/auth/admin/signup","/auth/admin/login").permitAll()
+                            .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                             .requestMatchers("/auth/v1/login", "/auth/v1/refreshToken", "/auth/v1/signup").permitAll()
                             .anyRequest().authenticated()
                     )

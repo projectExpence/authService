@@ -85,7 +85,7 @@ public class UserDetailsServiceImplement implements UserDetailsService {
         userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
 
         UserRole userRole = userRoleRepository.findByRoleName(Roles.USER)
-                .orElseThrow(()-> new RuntimeException("User role not found"));
+                .orElseThrow(()-> new RuntimeException("User role not found in Database"));
 
 
         String userId = UUID.randomUUID().toString();
@@ -101,6 +101,38 @@ public class UserDetailsServiceImplement implements UserDetailsService {
                 userInfoDto.getEmail(),
                 userInfoDto.getPassword(),roles
                 ));
+        return SignupResult.SUCCESS;
+    }
+    public SignupResult signupAdmin(UserInfoDto userInfoDto){
+        if(!isValidEmail(userInfoDto.getEmail())){
+            return SignupResult.INVALID_EMAIL;
+        }
+        if(!isValidPassword(userInfoDto.getPassword())){
+            return SignupResult.INVALID_PASSWORD;
+        }
+        if (checkUserAlreadyExists(userInfoDto)) {  // Now returns boolean
+            return SignupResult.USER_EXISTS;
+        }
+        userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
+
+        UserRole userRole = userRoleRepository.findByRoleName(Roles.ADMIN)
+                .orElseThrow(()-> new RuntimeException("User role not found in Database"));
+
+        String userId = UUID.randomUUID().toString();
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(userRole);
+        userRepository.save(new UserInfo(
+                userId,
+                userInfoDto.getFirstName(),
+                userInfoDto.getLastName(),
+                userInfoDto.getProfilePictureUrl(),
+                Provider.LOCAL,
+                userInfoDto.getUsername(),
+                userInfoDto.getEmail(),
+                userInfoDto.getPassword(),
+                roles
+
+        ));
         return SignupResult.SUCCESS;
     }
 }
