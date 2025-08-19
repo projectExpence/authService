@@ -2,6 +2,7 @@ package org.example.controller;
 
 import org.example.entities.RefreshToken;
 import org.example.entities.UserInfo;
+import org.example.exception.RefreshTokenNotFoundException;
 import org.example.repository.UserRepository;
 import org.example.request.AuthRequestDto;
 import org.example.request.RefreshTokenRequestDto;
@@ -108,7 +109,7 @@ public class TokenController {
                             .token(newRefreshToken.getToken()) // ✅ New rotated refresh token
                             .build();
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh Token is not on DB"));
+                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh Token is not found on DB"));
     }
 
 }

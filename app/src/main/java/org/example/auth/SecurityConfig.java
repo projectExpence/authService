@@ -1,5 +1,6 @@
 package org.example.auth;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 // IMPORTANT: Add imports for the new classes
 import org.example.service.UserDetailsServiceImplement;
@@ -47,11 +48,11 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain jwtApiFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
             http
-                    .securityMatcher("/auth/v1/**", "/api/**","/auth/admin/**")
+                    .securityMatcher("/auth/v1/**", "/api/**", "/auth/admin/**")
                     .csrf(AbstractHttpConfigurer::disable)
                     .cors(cors -> cors.configurationSource(corsConfigurationSource))
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/auth/admin/signup","/auth/admin/login").permitAll()
+                            .requestMatchers("/auth/admin/signup", "/auth/admin/login").permitAll()
                             .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                             .requestMatchers("/auth/v1/login", "/auth/v1/refreshToken", "/auth/v1/signup").permitAll()
                             .anyRequest().authenticated()
@@ -59,7 +60,20 @@ public class SecurityConfig {
                     .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                     .httpBasic(AbstractHttpConfigurer::disable)
-                    .formLogin(AbstractHttpConfigurer::disable);
+                    .formLogin(AbstractHttpConfigurer::disable)
+
+                     .exceptionHandling(ex -> ex
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                    })
+                             .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                 response.setContentType("application/json");
+                                 response.getWriter().write("{\"error\": \"Forbidden\"}");
+                             })
+            );
 
             return http.build();
         }
@@ -81,6 +95,7 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain oauth2WebFilterChain(HttpSecurity http) throws Exception {
             http
+                    .securityMatcher("/", "/login**", "/oauth2/**")
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/", "/login**", "/oauth2/**").permitAll() // Added /oauth2/**
                             .anyRequest().authenticated()
