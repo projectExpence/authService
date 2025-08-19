@@ -6,6 +6,7 @@ import org.example.entities.Provider;
 import org.example.entities.Roles;
 import org.example.entities.UserInfo;
 import org.example.entities.UserRole;
+import org.example.eventProducer.UserInfoProducer;
 import org.example.model.UserInfoDto;
 import org.example.repository.UserRepository;
 import org.example.repository.UserRoleRepository;
@@ -34,6 +35,9 @@ public class UserDetailsServiceImplement implements UserDetailsService {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private UserInfoProducer userInfoProducer;
 
 
     @Override
@@ -101,8 +105,14 @@ public class UserDetailsServiceImplement implements UserDetailsService {
                 userInfoDto.getEmail(),
                 userInfoDto.getPassword(),roles
                 ));
+        userInfoProducer.sentEventToKafka(userInfoDto); // data send to kafka
         return SignupResult.SUCCESS;
     }
+
+
+
+
+
     public SignupResult signupAdmin(UserInfoDto userInfoDto){
         if(!isValidEmail(userInfoDto.getEmail())){
             return SignupResult.INVALID_EMAIL;
@@ -133,6 +143,7 @@ public class UserDetailsServiceImplement implements UserDetailsService {
                 roles
 
         ));
+        userInfoProducer.sentEventToKafka(userInfoDto);
         return SignupResult.SUCCESS;
     }
 }
