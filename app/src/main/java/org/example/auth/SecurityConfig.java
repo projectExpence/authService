@@ -95,9 +95,9 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain oauth2WebFilterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher("/", "/login**", "/oauth2/**")
+                    .securityMatcher("/", "/login**", "/oauth2/**","/login/oauth2/**")
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/", "/login**", "/oauth2/**").permitAll() // Added /oauth2/**
+                            .requestMatchers("/", "/login**", "/oauth2/**","/login/oauth2/**").permitAll() // Added /oauth2/**
                             .anyRequest().authenticated()
                     )
                     // --- STEP 2: REPLACE THE DEFAULT OAUTH2 LOGIN WITH YOUR CUSTOMIZED VERSION ---
