@@ -40,7 +40,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String accessToken = jwtService.GenerateToken(email);
         RefreshToken refreshToken = refreshTokenService.createOrUpdateRefreshToken(user);
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/auth/callback")
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/my/frontend")
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken.getToken())
                 .build().toUriString();
