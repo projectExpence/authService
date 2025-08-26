@@ -4,6 +4,8 @@ import org.example.entities.Provider;
 import org.example.entities.Roles;
 import org.example.entities.UserInfo;
 import org.example.entities.UserRole;
+import org.example.eventProducer.UserInfoProducer;
+import org.example.model.UserInfoDto;
 import org.example.repository.UserRepository;
 import org.example.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class GoogleUserService extends DefaultOAuth2UserService {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private UserInfoProducer userInfoProducer;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -60,6 +65,17 @@ public class GoogleUserService extends DefaultOAuth2UserService {
         }
 
         userRepository.save(user);
+
+        UserInfoDto userInfoDto =UserInfoDto.builder()
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .build();
+
+        userInfoProducer.sentEventToKafka(userInfoDto);
 
         return oauth2User;
     }
