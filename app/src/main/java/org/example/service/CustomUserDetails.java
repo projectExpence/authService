@@ -26,13 +26,14 @@ public class CustomUserDetails implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
                 .collect(Collectors.toList());
     }
+
     @Override
     public String getPassword(){
         return userInfo.getPassword();
     }
     @Override
     public String getUsername(){
-        return userInfo.getUsername();
+        return userInfo.getEmail();
     }
     @Override
     public boolean isAccountNonExpired(){
@@ -49,6 +50,10 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled(){
         return true;
+    }
+    public String getDisplayName() {
+        // ✅ Use this wherever you need the nickname/handle
+        return userInfo.getUsername();
     }
 
 }

@@ -46,7 +46,7 @@ public class UserInfo {// Entity class representing user information
     @Column(nullable = true)
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY) // Many-to-many relationship with UserRole
+    @ManyToMany(fetch = FetchType.EAGER) // Many-to-many relationship with UserRole
     @JoinTable( // Join table to manage the many-to-many relationship
         name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"), // Join column for UserInfo

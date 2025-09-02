@@ -1,10 +1,10 @@
 package org.example.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.example.dto.ChangePasswordRequest;
 import org.example.entities.RefreshToken;
 import org.example.entities.UserInfo;
-import org.example.model.UserInfoDto;
+import org.example.dto.UserInfoDto;
 import org.example.repository.UserRepository;
 import org.example.response.JwtResponseDto;
 import org.example.service.JwtService;
@@ -13,11 +13,10 @@ import org.example.service.UserDetailsServiceImplement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
@@ -34,6 +33,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("auth/v1/signup")
     public ResponseEntity<?> Signup(@RequestBody UserInfoDto userInfoDto) {
@@ -91,5 +93,24 @@ public class AuthController {
                     e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @PutMapping("auth/v1/change-password")
+    public ResponseEntity<?> changePassword(
+            Authentication authentication, @RequestBody ChangePasswordRequest request){
+        String email= authentication.getName();
+        UserInfo user = userRepository.findByEmail(email).orElseThrow(
+                ()->new RuntimeException("User not found"));
+
+        if(user.getPassword()==null){
+            return ResponseEntity.badRequest().body("Google account user can't change password");
+        }
+
+        if(!passwordEncoder.matches(request.getOldPassword(),user.getPassword())){
+            return ResponseEntity.badRequest().body("Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok().body("Password change Successfully");
     }
 }

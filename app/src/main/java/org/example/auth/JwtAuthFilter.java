@@ -25,10 +25,10 @@ import java.io.IOException;
 @EqualsAndHashCode(callSuper = true)
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Autowired
+
     private final JwtService jwtService;
 
-    @Autowired
+
     private final UserDetailsServiceImplement userDetailsServiceImplement;
 
     @Override
@@ -41,7 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 token=authHeader.substring(7);
                 username=jwtService.extractUsername(token);
             }
-            if(username !=null && SecurityContextHolder.getContext().getAuthentication() == null){
+        if(username !=null && SecurityContextHolder.getContext().getAuthentication() == null){
                 UserDetails userDetails = getUserDetailsServiceImplement().loadUserByUsername(username);
                 if(jwtService.validateToken(token,userDetails)){
                     UsernamePasswordAuthenticationToken authenticationToken =

@@ -7,7 +7,7 @@ import org.example.entities.Roles;
 import org.example.entities.UserInfo;
 import org.example.entities.UserRole;
 import org.example.eventProducer.UserInfoProducer;
-import org.example.model.UserInfoDto;
+import org.example.dto.UserInfoDto;
 import org.example.repository.UserRepository;
 import org.example.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 

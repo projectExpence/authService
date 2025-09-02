@@ -5,7 +5,7 @@ import org.example.entities.Roles;
 import org.example.entities.UserInfo;
 import org.example.entities.UserRole;
 import org.example.eventProducer.UserInfoProducer;
-import org.example.model.UserInfoDto;
+import org.example.dto.UserInfoDto;
 import org.example.repository.UserRepository;
 import org.example.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;

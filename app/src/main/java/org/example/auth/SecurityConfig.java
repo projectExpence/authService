@@ -52,9 +52,17 @@ public class SecurityConfig {
                     .csrf(AbstractHttpConfigurer::disable)
                     .cors(cors -> cors.configurationSource(corsConfigurationSource))
                     .authorizeHttpRequests(auth -> auth
+                            // 🔒 change-password now requires authentication
+                            .requestMatchers("/auth/v1/change-password").authenticated()
+
+                            // public endpoints
                             .requestMatchers("/auth/admin/signup", "/auth/admin/login").permitAll()
-                            .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                             .requestMatchers("/auth/v1/login", "/auth/v1/refreshToken", "/auth/v1/signup").permitAll()
+
+                            // admin protected routes
+                            .requestMatchers("/auth/admin/**").hasRole("ADMIN")
+
+                            // everything else requires login
                             .anyRequest().authenticated()
                     )
                     .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

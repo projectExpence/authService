@@ -2,7 +2,7 @@ package org.example.serializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serializer;
-import org.example.model.UserInfoDto;
+import org.example.dto.UserInfoDto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
