@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import org.example.dto.ForgotPasswordRequest;
+import org.example.entities.Provider;
 import org.example.entities.RefreshToken;
 import org.example.entities.UserInfo;
 import org.example.exception.RefreshTokenNotFoundException;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 public class TokenController {
@@ -110,6 +114,22 @@ public class TokenController {
                             .build();
                 })
                 .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh Token is not found on DB"));
+    }
+    @PostMapping("auth/v1/forgot-password")
+    private ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request){
+        Optional<UserInfo> userOtp = userRepository.findByEmail(request.getEmail());
+
+        if(userOtp.isEmpty()){
+            return ResponseEntity.badRequest().body("No user found with this email");
+        }
+        UserInfo user = userOtp.get();
+
+        if(user.getProvider() == Provider.GOOGLE){
+            return ResponseEntity.badRequest().body("This account uses Google login. Please sign in with Google.");
+        }
+        // Todo: email send
+
+        return ResponseEntity.ok().body("Password reset link has been sent to your email.");
     }
 
 }
