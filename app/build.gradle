@@ -45,7 +45,9 @@ dependencies {
 
 
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'com.sun.mail:javax.mail:1.6.2'
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
+    implementation 'org.eclipse.angus:angus-mail:2.0.2'
+
 
     // For Gmail OAuth2 authentication
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.38.0'

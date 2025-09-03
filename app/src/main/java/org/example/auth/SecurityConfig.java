@@ -55,6 +55,9 @@ public class SecurityConfig {
                             // 🔒 change-password now requires authentication
                             .requestMatchers("/auth/v1/change-password").authenticated()
 
+                            // Forgot and reset service
+                            .requestMatchers("/auth/v1/forgot-password", "/auth/v1/reset-password").permitAll()
+
                             // public endpoints
                             .requestMatchers("/auth/admin/signup", "/auth/admin/login").permitAll()
                             .requestMatchers("/auth/v1/login", "/auth/v1/refreshToken", "/auth/v1/signup").permitAll()

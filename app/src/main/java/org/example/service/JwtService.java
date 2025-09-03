@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,5 +69,34 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+    public String generateResetToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "password_reset");
+        return Jwts.builder()
+                .claims(claims)
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000)) // 15 min
+                .signWith(secretKey)
+                .compact();
+    }
+
+
+    public Boolean validateResetToken(String token, CustomUserDetails customUserDetails) {
+        try {
+            Claims claims = extractAllClaims(token);
+
+            String type = claims.get("type", String.class);
+            if (type == null || !type.equals("password_reset")) {
+                return false;
+            }
+
+            return !isTokenExpire(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
 }

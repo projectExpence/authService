@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.dto.ForgotPasswordRequest;
+import org.example.dto.ResetPasswordRequest;
 import org.example.entities.Provider;
 import org.example.entities.RefreshToken;
 import org.example.entities.UserInfo;
@@ -9,6 +10,8 @@ import org.example.repository.UserRepository;
 import org.example.request.AuthRequestDto;
 import org.example.request.RefreshTokenRequestDto;
 import org.example.response.JwtResponseDto;
+import org.example.service.CustomUserDetails;
+import org.example.service.EmailService;
 import org.example.service.JwtService;
 import org.example.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +43,10 @@ public class TokenController {
     @Autowired JwtService jwtService;
 
     @Autowired private UserRepository userRepository;
+
+    @Autowired private EmailService emailService;
+
+    @Autowired private PasswordEncoder passwordEncoder;
 
 
     @PostMapping("auth/v1/login")
@@ -116,7 +124,7 @@ public class TokenController {
                 .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh Token is not found on DB"));
     }
     @PostMapping("auth/v1/forgot-password")
-    private ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request){
+    private ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) throws Exception {
         Optional<UserInfo> userOtp = userRepository.findByEmail(request.getEmail());
 
         if(userOtp.isEmpty()){
@@ -127,9 +135,41 @@ public class TokenController {
         if(user.getProvider() == Provider.GOOGLE){
             return ResponseEntity.badRequest().body("This account uses Google login. Please sign in with Google.");
         }
-        // Todo: email send
+        String resetToken = jwtService.generateResetToken(user.getEmail());
+
+        String resetLink = "http://localhost:3000/reset-password?token="+resetToken; // replace with frontend link
+
+        emailService.sendForgotPasswordLink(user.getEmail(),resetLink,user.getFirstName());
 
         return ResponseEntity.ok().body("Password reset link has been sent to your email.");
+    }
+
+    @PostMapping("auth/v1/reset-password")
+    private ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request){
+        try{
+            if(!request.getNewPassword().equals(request.getConfirmPassword())){
+                return ResponseEntity.badRequest().body("Password do not match");
+            }
+
+            String email = jwtService.extractUsername(request.getToken());
+
+            UserInfo user = userRepository.findByEmail(email).orElseThrow(
+                    ()->new RuntimeException("Invalid token or user not found"));
+
+            if(!jwtService.validateResetToken(request.getToken(),new CustomUserDetails(user))){
+                return ResponseEntity.badRequest().body("Invalid or expired reset link");
+            }
+            System.out.println("NewPassword: " + request.getNewPassword());
+            System.out.println("ConfirmPassword: " + request.getConfirmPassword());
+            System.out.println("Token: " + request.getToken());
+
+            user.setPassword(passwordEncoder.encode(request.getConfirmPassword()));
+
+            userRepository.save(user);
+            return ResponseEntity.ok().body("Password reset successfully");
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body("Reset failed "+e.getMessage());
+        }
     }
 
 }
