@@ -40,9 +40,13 @@ public class GoogleUserService extends DefaultOAuth2UserService {
         Optional<UserInfo> userOptional = userRepository.findByEmail(email);
 
         UserInfo user;
+        Boolean isNewUser = false;
         if (userOptional.isPresent()) {
             // User exists, update their details
             user = userOptional.get();
+            if(user.getProvider()==Provider.LOCAL){
+                user.setProvider(Provider.GOOGLE);
+            }
             user.setFirstName(oauth2User.getAttribute("given_name"));
             user.setLastName(oauth2User.getAttribute("family_name"));
             user.setProfilePictureUrl(oauth2User.getAttribute("picture"));
@@ -62,20 +66,24 @@ public class GoogleUserService extends DefaultOAuth2UserService {
             user.setProvider(Provider.GOOGLE);
             user.setPassword(null);
             user.setRoles(Set.of(userRole));
+            isNewUser = true;
         }
 
         userRepository.save(user);
 
-        UserInfoDto userInfoDto =UserInfoDto.builder()
-                .username(user.getUsername())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .profilePictureUrl(user.getProfilePictureUrl())
-                .build();
 
-        userInfoProducer.sentEventToKafka(userInfoDto);
+            UserInfoDto userInfoDto =UserInfoDto.builder()
+                    .username(user.getUsername())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .email(user.getEmail())
+                    .password(user.getPassword())
+                    .profilePictureUrl(user.getProfilePictureUrl())
+                    .isNewUser(isNewUser)
+                    .build();
+
+            userInfoProducer.sentEventToKafka(userInfoDto);
+
 
         return oauth2User;
     }
