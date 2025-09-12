@@ -1,6 +1,7 @@
 package org.example.auth;
 
 import org.example.service.GmailOAuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,6 +14,8 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
+    @Value("${gmail.sender}")
+    private String email;
     private final GmailOAuthService gmailOAuth2Service;
 
     public MailConfig(GmailOAuthService gmailOAuthService){
@@ -23,7 +26,7 @@ public class MailConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
-        mailSender.setUsername("noreply.moneyfy@gmail.com");
+        mailSender.setUsername(email);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.smtp.auth", "true");
@@ -40,7 +43,7 @@ public class MailConfig {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                return new PasswordAuthentication("noreply.moneyfy@gmail.com", accessToken);
+                return new PasswordAuthentication(email, accessToken);
             }
         });
         mailSender.setSession(session);

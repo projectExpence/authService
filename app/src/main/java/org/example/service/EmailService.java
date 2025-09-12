@@ -2,6 +2,7 @@ package org.example.service;
 
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+    @Value("${gmail.sender}")
+    private String email;
 
 
     public void sendForgotPasswordLink(String toEmail, String resetLink,String firstName) {
@@ -18,7 +21,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom("noreply.moneyfy@gmail.com", "Moneyfy Support");
+            helper.setFrom(email, "Moneyfy Support");
             helper.setTo(toEmail);
             helper.setSubject("Reset your Password - Moneyfy");
 
